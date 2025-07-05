@@ -4,8 +4,9 @@
 
 #pragma once
 #include "debug_print/debug_print.h"
+#include "led/led.h"
 
-class Interface: public DebugPrint{
+class Interface : public DebugPrint, public Led {
  public:
   static Interface &get_instance() {
     static __attribute__((section(".ccmram"))) Interface interface;
@@ -13,7 +14,7 @@ class Interface: public DebugPrint{
   }
   Interface(const Interface &) = delete;
   Interface &operator=(const Interface &) = delete;
-  virtual void print(char *fmt, ...) override;
+
  private:
   Interface(){}
   ~Interface(){}

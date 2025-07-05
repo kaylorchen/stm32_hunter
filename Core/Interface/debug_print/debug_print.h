@@ -6,5 +6,5 @@
 
 class DebugPrint{
  public:
-  virtual void print(char *fmt, ...) = 0;
+  void print(char *fmt, ...);
 };

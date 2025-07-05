@@ -3,8 +3,12 @@
 //
 
 #pragma once
+#include "stdint.h"
 
-
-class led {
-
+class Led {
+ public:
+  Led();
+  void LedOn(uint8_t index);
+  void LedOff(uint8_t index);
+  void LedToggle(uint8_t index);
 };

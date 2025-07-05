@@ -9,6 +9,7 @@
 #include "main.h"
 
 void UserTaskImpl::UserMainLoopCallback() {
+  auto &instance = Interface::get_instance();
   elog_init();
   elog_start();
   while (1){
@@ -18,6 +19,9 @@ void UserTaskImpl::UserMainLoopCallback() {
     elog_i("UserMainLoop", "info");
     elog_d("UserMainLoop", "debug");
     elog_v("UserMainLoop", "verbose");
+    instance.LedToggle(0);
+    instance.LedToggle(1);
+    instance.LedToggle(2);
     HAL_Delay(1000);
   }
 }

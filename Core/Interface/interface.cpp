@@ -3,16 +3,3 @@
 //
 
 #include "interface.h"
-#include "usart.h"
-#include "stdarg.h"
-#include "stdio.h"
-
-void Interface::print(char *fmt, ...) {
-  char sprint_buf[256];
-  va_list args;
-  int n;
-  va_start(args, fmt);
-  n = vsprintf(sprint_buf, fmt, args);
-  va_end(args);
-  HAL_UART_Transmit(&huart1, (uint8_t *)sprint_buf, n, n);
-}
