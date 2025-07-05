@@ -56,6 +56,7 @@ add_definitions(-DDEBUG -DUSE_HAL_DRIVER -DSTM32F407xx)
 file(GLOB_RECURSE SOURCES "Core/*.*" "Drivers/*.*")
 include_directories(Core/Interface)
 include_directories(Core/User)
+include_directories(Core/EasyLogger)
 
 set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F407ZGTX_FLASH.ld)
 
