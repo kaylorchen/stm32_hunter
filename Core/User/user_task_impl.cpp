@@ -8,6 +8,11 @@
 #include "interface.h"
 #include "main.h"
 
+UserTaskImpl &UserTaskImpl::get_instance() {
+  static __attribute__((section(".ccmram"))) UserTaskImpl instance;
+  return instance;
+}
+
 void UserTaskImpl::UserMainLoopCallback() {
   auto &instance = Interface::get_instance();
   elog_init();

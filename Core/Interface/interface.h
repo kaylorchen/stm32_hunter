@@ -8,12 +8,9 @@
 
 class Interface : public DebugPrint, public Led {
  public:
-  static Interface &get_instance() {
-    static __attribute__((section(".ccmram"))) Interface interface;
-    return interface;
-  }
-  Interface(const Interface &) = delete;
-  Interface &operator=(const Interface &) = delete;
+   static Interface &get_instance();
+   Interface(const Interface &) = delete;
+   Interface &operator=(const Interface &) = delete;
 
  private:
   Interface(){}
