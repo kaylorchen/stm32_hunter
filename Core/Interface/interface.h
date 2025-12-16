@@ -7,12 +7,13 @@
 #include "led/led.h"
 
 class Interface : public DebugPrint, public Led {
- public:
-   static Interface &get_instance();
-   Interface(const Interface &) = delete;
-   Interface &operator=(const Interface &) = delete;
+public:
+  static Interface &get_instance();
+  Interface(const Interface &) = delete;
+  Interface &operator=(const Interface &) = delete;
+  void delay_ms(uint32_t ms);
 
- private:
-  Interface(){}
-  ~Interface(){}
+private:
+  Interface() {}
+  ~Interface() {}
 };
