@@ -10,7 +10,9 @@ extern "C" {
 void UserMainLoop() {
   UserTaskImpl::get_instance().UserMainLoopCallback();
 }
-
+void MicrorosTimerCallback() {
+  UserTaskImpl::get_instance().MicorosTimerCallbackImpl();
+}
 #ifdef __cplusplus
 }
 #endif

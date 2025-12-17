@@ -5,6 +5,7 @@
 #include "task.h"
 #include "microros.h"
 #include "elog.h"
+#include "interface.h"
 extern "C" {
 #include "micro_ros.h"
 #include "rcl/error_handling.h"
@@ -35,7 +36,11 @@ extern "C" {
   }
 
 Microros::Microros() {}
-Microros::~Microros() {}
+Microros::~Microros() {
+  // Free resources
+  RCCHECK(rcl_publisher_fini(&key_state_publisher_, &node_));
+  RCCHECK(rcl_node_fini(&node_));
+}
 
 void Microros::Initialize(void) {
   auto write_func_ptr =
@@ -81,3 +86,33 @@ void Microros::Initialize(void) {
               executor_.handles[i].type, executor_.max_handles);
   }
 }
+
+void Microros::Run(void) {
+  elog_info("MicroROS", "Micro-ROS app started. Waiting for agent to be ready.");
+  Interface::get_instance().MicrorosTimerStart();
+  elog_info("MicroROS", "Microros Timer started.");
+  while (true) {
+    auto status = rclc_executor_spin_some(&executor_, 1000000);
+    switch (status) {
+    case RCL_RET_INVALID_ARGUMENT:
+      elog_error("MicroROS", "executor RCL_RET_INVALID_ARGUMENT");
+      break;
+    case RCL_RET_TIMEOUT:
+      elog_warn("MicroROS", "executor RCL_RET_TIMEOUT");
+      break;
+    case RCL_RET_ERROR:
+      elog_error("MicroROS", "executor RCL_RET_ERROR");
+      break;
+    default:
+      break;
+    }
+    vTaskDelay(1);
+  }
+}
+
+void Microros::PublishKeyState() {
+  kaylordut_interfaces__msg__Key key_state_msg = {0};
+  key_state_msg.value = Interface::get_instance().GetKeyState(0);
+  RCCHECK(rcl_publish(&key_state_publisher_, &key_state_msg, nullptr));
+}
+

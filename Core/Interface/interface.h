@@ -4,9 +4,16 @@
 
 #pragma once
 #include "debug_print/debug_print.h"
+#include "key/key.h"
 #include "led/led.h"
+#include "microros_timer/microros_timer.h"
+#include "system/system.h"
 
-class Interface : public DebugPrint, public Led {
+class Interface : public DebugPrint,
+                  public Led,
+                  public System,
+                  public MicrorosTimer,
+                  public Key {
 public:
   static Interface &get_instance();
   Interface(const Interface &) = delete;

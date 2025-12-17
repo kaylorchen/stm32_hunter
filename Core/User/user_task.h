@@ -8,6 +8,7 @@
 extern "C" {
 #endif
   void UserMainLoop();
+  void MicrorosTimerCallback();
 #ifdef __cplusplus
 }
 #endif

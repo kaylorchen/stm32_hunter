@@ -3,16 +3,19 @@
 //
 
 #pragma once
-
+#include "microros.h"
 
 class UserTaskImpl {
- public:
-   static UserTaskImpl &get_instance();
-   UserTaskImpl(const UserTaskImpl &) = delete;
-   UserTaskImpl &operator=(const UserTaskImpl &) = delete;
-   void UserMainLoopCallback();
+public:
+  static UserTaskImpl &get_instance();
+  UserTaskImpl(const UserTaskImpl &) = delete;
+  UserTaskImpl &operator=(const UserTaskImpl &) = delete;
+  void UserMainLoopCallback();
+  void MicorosTimerCallbackImpl();
+  void PrintTaskInfo();
 
- private:
+private:
   UserTaskImpl() {}
   ~UserTaskImpl() {}
+  Microros microros_;
 };

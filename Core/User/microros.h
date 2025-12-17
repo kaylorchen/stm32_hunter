@@ -19,6 +19,7 @@ public:
   ~Microros();
   void Initialize(void);
   void Run(void);
+  void PublishKeyState();
 
 private:
   const char *target_ip_addr_and_port = "192.168.11.2:8888";
