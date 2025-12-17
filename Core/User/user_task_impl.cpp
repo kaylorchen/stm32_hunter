@@ -66,9 +66,9 @@ void UserTaskImpl::MicorosTimerCallbackImpl() {
   // elog_i("MicorosTimer", "MicorosTimerCallback");
   static uint16_t _1000ms_counter = 0;
   _1000ms_counter++;
-  elog_info("MicorosTimerCallbackImpl", "_1000ms_counter = %d", _1000ms_counter);
   if (_1000ms_counter == timer_loop_period_ms_) {
     _1000ms_counter = 0;
+    elog_info("UserMainLoop", "Publish Key State");
     microros_.PublishKeyState();
   }
 }
