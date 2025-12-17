@@ -12,6 +12,11 @@ set(CMAKE_OBJDUMP arm-none-eabi-objdump)
 set(SIZE arm-none-eabi-size)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
+option(ETH_W5500 "W5500 ON/OFF" ON)
+if (ETH_W5500)
+    add_definitions(-D_W5500)
+endif ()
+
 # project settings
 project(stm32_without_rtos C CXX ASM)
 set(CMAKE_CXX_STANDARD 17)
@@ -59,6 +64,15 @@ include_directories(
         Core/W5500
         Core/User
 )
+# set micro ros transport
+if (ETH_W5500)
+    set(MICRO_ROS_TRANSPORT w5500)
+else ()
+    set(MICRO_ROS_TRANSPORT udp)
+endif ()
+message(STATUS "micro ros transport is ${MICRO_ROS_TRANSPORT}")
+include(/opt/microros/libmicroros.cmake)
+include(rwm_uxrce_max.cmake)
 
 set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F407ZGTX_FLASH.ld)
 
@@ -66,7 +80,8 @@ add_link_options(-Wl,-gc-sections,--print-memory-usage,-Map=${PROJECT_BINARY_DIR
 add_link_options(-mcpu=cortex-m4 -mthumb -mthumb-interwork)
 add_link_options(-T ${LINKER_SCRIPT})
 
-add_executable(${PROJECT_NAME}.elf ${SOURCES} ${LINKER_SCRIPT})
+add_executable(${PROJECT_NAME}.elf ${SOURCES} ${LINKER_SCRIPT} ${MICRO_ROS_SRC})
+target_link_libraries(${PROJECT_NAME}.elf PRIVATE ${MICRO_ROS_LIB})
 
 set(HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex)
 set(BIN_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.bin)

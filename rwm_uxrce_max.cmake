@@ -1,0 +1,6 @@
+add_definitions(-DRMW_UXRCE_MAX_NODES=1)
+add_definitions(-DRMW_UXRCE_MAX_PUBLISHERS=2)
+add_definitions(-DRMW_UXRCE_MAX_SUBSCRIPTIONS=2)
+add_definitions(-DRMW_UXRCE_MAX_SERVICES=1)
+add_definitions(-DRMW_UXRCE_MAX_CLIENTS=0)
+add_definitions(-DRMW_UXRCE_MAX_HISTORY=4)

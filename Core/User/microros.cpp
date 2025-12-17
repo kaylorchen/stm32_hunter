@@ -1,0 +1,83 @@
+//
+// Created by kaylor on 12/17/25.
+//
+#include "FreeRTOS.h"
+#include "task.h"
+#include "microros.h"
+#include "elog.h"
+extern "C" {
+#include "micro_ros.h"
+#include "rcl/error_handling.h"
+#include "rcl/rcl.h"
+#include "rclc/executor.h"
+#include "rclc/rclc.h"
+#include "rmw_microros/rmw_microros.h"
+#include "rmw_microxrcedds_c/config.h"
+#include "uxr/client/transport.h"
+}
+#define MICROROS_TAG "MicroROS"
+#define RCCHECK(fn)                                                            \
+  {                                                                            \
+    rcl_ret_t temp_rc = fn;                                                    \
+    if ((temp_rc != RCL_RET_OK)) {                                             \
+      elog_e(MICROROS_TAG, "Failed status on %s %d, ret = %d. Aborting.\n",    \
+             __FILE__, __LINE__, (int)temp_rc);                                \
+      vTaskDelete(NULL);                                                       \
+    }                                                                          \
+  }
+#define RCSOFTCHECK(fn)                                                        \
+  {                                                                            \
+    rcl_ret_t temp_rc = fn;                                                    \
+    if ((temp_rc != RCL_RET_OK)) {                                             \
+      elog_e(MICROROS_TAG, "Failed status on %s:%d, ret = %d. Continuing.\n",  \
+             __FILE__, __LINE__, (int)temp_rc);                                \
+    }                                                                          \
+  }
+
+Microros::Microros() {}
+Microros::~Microros() {}
+
+void Microros::Initialize(void) {
+  auto write_func_ptr =
+      reinterpret_cast<write_custom_func>(cubemx_transport_write);
+
+  rmw_uros_set_custom_transport(
+      false, // Framing disable here. Udp should Use Packet-oriented mode.
+      const_cast<char *>(target_ip_addr_and_port), // your Agent's ip address
+      cubemx_transport_open, cubemx_transport_close, write_func_ptr,
+      cubemx_transport_read);
+
+  rcl_allocator_t freeRTOS_allocator = rcutils_get_zero_initialized_allocator();
+  freeRTOS_allocator.allocate = microros_allocate;
+  freeRTOS_allocator.deallocate = microros_deallocate;
+  freeRTOS_allocator.reallocate = microros_reallocate;
+  freeRTOS_allocator.zero_allocate = microros_zero_allocate;
+
+  if (!rcutils_set_default_allocator(&freeRTOS_allocator)) {
+    elog_error("MicroROS", "Error on default allocators (line %d)\r\n",
+               __LINE__);
+  } else {
+    elog_info("MicroROS", "set default allocator successfully\r\n");
+  }
+  // micro-ROS app
+  allocator_ = rcl_get_default_allocator();
+  auto init_options = rcl_get_zero_initialized_init_options();
+  RCCHECK(rcl_init_options_init(&init_options, allocator_));
+  RCCHECK(rcl_init_options_set_domain_id(&init_options, domain_id_));
+  // create init_options
+  RCCHECK(rclc_support_init_with_options(&support_, 0, NULL, &init_options,
+                                         &allocator_));
+  // create node
+  RCCHECK(rclc_node_init_default(&node_, node_name_, namespace_, &support_));
+  // create publisher
+  RCCHECK(rclc_publisher_init_best_effort(
+      &key_state_publisher_, &node_,
+      ROSIDL_GET_MSG_TYPE_SUPPORT(kaylordut_interfaces, msg, Key),
+      key_state_topic_name_));
+  RCCHECK(rclc_executor_init(&executor_, &support_.context, 2, &allocator_));
+  for (int i = 0;
+       (i < executor_.max_handles && executor_.handles[i].initialized); ++i) {
+    elog_info("Executor", "handles[%d].type=%d, max = %d", i,
+              executor_.handles[i].type, executor_.max_handles);
+  }
+}
