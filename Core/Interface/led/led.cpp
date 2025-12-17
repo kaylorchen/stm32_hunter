@@ -55,3 +55,11 @@ void Led::LedToggle(uint8_t index) {
       break;
   }
 }
+
+void Led::LedSet(uint8_t index, uint8_t value) {
+  if (value == 0) {
+    LedOn(index);
+  } else {
+    LedOff(index);
+  }
+}

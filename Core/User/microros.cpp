@@ -6,6 +6,8 @@
 #include "microros.h"
 #include "elog.h"
 #include "interface.h"
+
+#include <functional>
 extern "C" {
 #include "micro_ros.h"
 #include "rcl/error_handling.h"
@@ -42,6 +44,33 @@ Microros::~Microros() {
   RCCHECK(rcl_node_fini(&node_));
 }
 
+void Microros::CreatePublisher() {
+  // create publisher
+  RCCHECK(rclc_publisher_init_best_effort(
+      &key_state_publisher_, &node_,
+      ROSIDL_GET_MSG_TYPE_SUPPORT(kaylordut_interfaces, msg, Key),
+      key_state_topic_name_));
+}
+
+void Microros::CreateSubscription() {
+  // create subscription
+  RCCHECK(rclc_subscription_init_best_effort(
+      &led_subscription_, &node_,
+      ROSIDL_GET_MSG_TYPE_SUPPORT(kaylordut_interfaces, msg, Led),
+      led_topic_name_));
+  RCCHECK(rclc_executor_add_subscription(
+      &executor_, &led_subscription_, &led_command_msg_,
+      [](const void *msg) { Microros::LedCallback(msg); }, ON_NEW_DATA));
+}
+
+void Microros::LedCallback(const void *msg) {
+  const kaylordut_interfaces__msg__Led *led_msg =
+      (const kaylordut_interfaces__msg__Led *)msg;
+  elog_info("LedCallback", "led_msg->id = %d, led_msg->state = %d", led_msg->id,
+            led_msg->value);
+  Interface::get_instance().LedSet(led_msg->id, led_msg->value);
+}
+
 void Microros::Initialize(void) {
   auto write_func_ptr =
       reinterpret_cast<write_custom_func>(cubemx_transport_write);
@@ -74,12 +103,11 @@ void Microros::Initialize(void) {
                                          &allocator_));
   // create node
   RCCHECK(rclc_node_init_default(&node_, node_name_, namespace_, &support_));
-  // create publisher
-  RCCHECK(rclc_publisher_init_best_effort(
-      &key_state_publisher_, &node_,
-      ROSIDL_GET_MSG_TYPE_SUPPORT(kaylordut_interfaces, msg, Key),
-      key_state_topic_name_));
+  // create executor
   RCCHECK(rclc_executor_init(&executor_, &support_.context, 2, &allocator_));
+  // create application after creating executor and node
+  CreatePublisher();
+  CreateSubscription();
   for (int i = 0;
        (i < executor_.max_handles && executor_.handles[i].initialized); ++i) {
     elog_info("Executor", "handles[%d].type=%d, max = %d", i,

@@ -18,4 +18,5 @@ private:
   UserTaskImpl() {}
   ~UserTaskImpl() {}
   Microros microros_;
+  const uint16_t timer_loop_period_ms_ = 1000;
 };

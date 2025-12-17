@@ -6,10 +6,11 @@
 
 #ifdef __cplusplus
 extern "C" {
-#include "rcl/publisher.h"
-#include "rclc/rclc.h"
-#include "rclc/executor.h"
 #include "kaylordut_interfaces/msg/key.h"
+#include "kaylordut_interfaces/msg/led.h"
+#include "rcl/publisher.h"
+#include "rclc/executor.h"
+#include "rclc/rclc.h"
 }
 #endif
 
@@ -33,5 +34,11 @@ private:
   rcl_publisher_t key_state_publisher_;
   const char *key_state_topic_name_ = "key_state";
   kaylordut_interfaces__msg__Key key_state_msg_;
+  rcl_subscription_t led_subscription_;
+  const char *led_topic_name_ = "led_command";
+  kaylordut_interfaces__msg__Led led_command_msg_;
   rclc_executor_t executor_;
+  void CreatePublisher();
+  void CreateSubscription();
+  static void LedCallback(const void *msg);
 };

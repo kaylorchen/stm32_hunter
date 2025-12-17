@@ -63,7 +63,13 @@ void UserTaskImpl::UserMainLoopCallback() {
 
 void UserTaskImpl::MicorosTimerCallbackImpl() {
   auto &interface = Interface::get_instance();
-  elog_i("MicorosTimer", "MicorosTimerCallback");
-  microros_.PublishKeyState();
+  // elog_i("MicorosTimer", "MicorosTimerCallback");
+  static uint16_t _1000ms_counter = 0;
+  _1000ms_counter++;
+  elog_info("MicorosTimerCallbackImpl", "_1000ms_counter = %d", _1000ms_counter);
+  if (_1000ms_counter == timer_loop_period_ms_) {
+    _1000ms_counter = 0;
+    microros_.PublishKeyState();
+  }
 }
 

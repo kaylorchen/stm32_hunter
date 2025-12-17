@@ -11,4 +11,5 @@ class Led {
   void LedOn(uint8_t index);
   void LedOff(uint8_t index);
   void LedToggle(uint8_t index);
+  void LedSet(uint8_t index, uint8_t value);
 };
